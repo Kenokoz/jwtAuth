@@ -17,9 +17,7 @@ app.use('/auth', authRoutes);
 
 const start = async () => {
   try {
-    await mongoose.connect(
-      'mongodb+srv://user:user@cluster0.cskco.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
-    );
+    await mongoose.connect(process.env.DB_URL);
     app.listen(PORT, () => {
       console.log(`Server is started on PORT = ${PORT}`);
     });
