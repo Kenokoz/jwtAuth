@@ -15,16 +15,33 @@ class UserService {
     }
 
     const hashPass = hashSync(password, 3);
-    const activationLink = `${process.env.API_URL}/auth/activate/${v4()}`; //получаем уникальную строку
+
+    const linkId = v4(); //получаем уникальную строку
+    const activationLink = `${process.env.API_URL}/auth/activate/${linkId}`;
 
     await mailService.sendActivationMail(email, activationLink);
-    const user = await User.create({ email, password: hashPass, activationLink });
+    const user = await User.create({
+      email,
+      password: hashPass,
+      activationLink: linkId,
+    });
 
     const userDto = new UserDto(user); // id, email, isActivated
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
     return { ...tokens, user: userDto };
+  }
+
+  async activate(activationLink) {
+    const user = await User.findOne({ activationLink });
+
+    if (!user) {
+      throw new Error('Incorrect link');
+    }
+
+    user.isActivated = true;
+    await user.save();
   }
 }
 
