@@ -1,6 +1,7 @@
 const { hashSync } = require('bcrypt');
 const { v4 } = require('uuid');
 const UserDto = require('../dtos/UserDto');
+const ApiError = require('../exceptions/apiError');
 
 const User = require('../models/User');
 const mailService = require('./mailService');
@@ -11,7 +12,7 @@ class UserService {
     const candidate = await User.findOne({ email });
 
     if (candidate) {
-      throw new Error(`User with this ${email} already exists`);
+      throw ApiError.BadRequest(`User with this ${email} already exists`);
     }
 
     const hashPass = hashSync(password, 3);
@@ -37,7 +38,7 @@ class UserService {
     const user = await User.findOne({ activationLink });
 
     if (!user) {
-      throw new Error('Incorrect link');
+      throw ApiError.BadRequest('Incorrect link');
     }
 
     user.isActivated = true;
