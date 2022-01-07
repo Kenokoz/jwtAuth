@@ -15,10 +15,10 @@ class UserService {
     }
 
     const hashPass = hashSync(password, 3);
-    const activationLink = v4(); //получаем уникальную строку
+    const activationLink = `${process.env.API_URL}/auth/activate/${v4()}`; //получаем уникальную строку
 
-    const user = await User.create({ email, password: hashPass, activationLink });
     await mailService.sendActivationMail(email, activationLink);
+    const user = await User.create({ email, password: hashPass, activationLink });
 
     const userDto = new UserDto(user); // id, email, isActivated
     const tokens = tokenService.generateTokens({ ...userDto });
