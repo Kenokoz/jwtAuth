@@ -1,4 +1,5 @@
-const { sign } = require('jsonwebtoken');
+const { sign, verify } = require('jsonwebtoken');
+
 const Token = require('../models/Token');
 
 class TokenService {
@@ -7,6 +8,24 @@ class TokenService {
     const refreshToken = sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' });
 
     return { accessToken, refreshToken };
+  }
+
+  validateAccessToken(token) {
+    try {
+      const userData = verify(token, process.env.JWT_ACCESS_SECRET);
+      return userData;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  validateRefreshToken(token) {
+    try {
+      const userData = verify(token, process.env.JWT_REFRESH_SECRET);
+      return userData;
+    } catch (error) {
+      return null;
+    }
   }
 
   async saveToken(userId, refreshToken) {
@@ -23,6 +42,11 @@ class TokenService {
 
   async removeToken(refreshToken) {
     const tokenData = await Token.deleteOne({ refreshToken });
+    return tokenData;
+  }
+
+  async findToken(refreshToken) {
+    const tokenData = await Token.findOne({ refreshToken });
     return tokenData;
   }
 }
