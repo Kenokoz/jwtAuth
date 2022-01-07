@@ -1,11 +1,11 @@
-const { hashSync } = require('bcrypt');
+const { hashSync, compare } = require('bcrypt');
 const { v4 } = require('uuid');
-const UserDto = require('../dtos/UserDto');
-const ApiError = require('../exceptions/apiError');
 
 const User = require('../models/User');
 const mailService = require('./mailService');
 const tokenService = require('./tokenService');
+const UserDto = require('../dtos/UserDto');
+const ApiError = require('../exceptions/apiError');
 
 class UserService {
   async registration(email, password) {
@@ -43,6 +43,26 @@ class UserService {
 
     user.isActivated = true;
     await user.save();
+  }
+
+  async login(email, password) {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw ApiError.BadRequest('User was not found');
+    }
+
+    const isPassEquals = await compare(password, user.password);
+
+    if (!isPassEquals) {
+      throw ApiError.BadRequest('Invalid password');
+    }
+
+    const userDto = new UserDto(user);
+    const tokens = tokenService.generateTokens({ ...userDto });
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+    return { ...tokens, user: userDto };
   }
 }
 
