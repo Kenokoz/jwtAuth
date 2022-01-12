@@ -74,7 +74,9 @@ class AuthController {
 
   async getUsers(req, res, next) {
     try {
-      res.json('hi');
+      const userId = req.user.id;
+      const users = await userService.getAllUsers(userId);
+      return res.json(users);
     } catch (e) {
       next(e);
     }

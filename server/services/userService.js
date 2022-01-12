@@ -89,6 +89,18 @@ class UserService {
 
     return { ...tokens, user: userDto };
   }
+
+  async getAllUsers(userId) {
+    const user = await User.findOne({ _id: userId });
+    console.log('user', user);
+
+    if (!user?.isActivated) {
+      throw ApiError.BadRequest('User is not activated');
+    }
+
+    const users = await User.find();
+    return users;
+  }
 }
 
 module.exports = new UserService();
