@@ -1,7 +1,12 @@
 import React, { FC } from 'react';
+import LoginForm from './components/LoginForm';
 
 const App: FC = () => {
-  return <div>123sda</div>;
+  return (
+    <div>
+      <LoginForm />
+    </div>
+  );
 };
 
 export default App;
